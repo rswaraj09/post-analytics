@@ -1,3 +1,17 @@
 .kiro
 AI_AGENT_PROMPT.md
 issues.md
+node_modules
+.vscode
+
+
+DEMO_RESPONSE_EXAMPLE.md
+DEMO_TESTING.md
+IMPLEMENTATION_SUMMARY.md
+SCRAPING_FIXED.md
+restart-backend.bat
+
+backend/debug-screenshot.png
+backend/debug-page.html
+backend/.jqwik-database
+backend/logs
