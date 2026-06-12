@@ -319,5 +319,134 @@ class InstagramGraphApiServiceTest {
         assertEquals("test-app-id", appId);
         assertEquals("test-app-secret", appSecret);
     }
+
+    // ===== Task 8.4: Error Handling Tests =====
+
+    /**
+     * Test that rate limit errors are properly detected
+     * Validates Requirement 15.2: Rate limit error detection for exponential backoff
+     */
+    @Test
+    void testRateLimitErrorDetection_Http429() {
+        // Arrange - Create exception for HTTP 429
+        GraphApiException exception = new GraphApiException("Rate limit exceeded", 429, "RATE_LIMIT");
+        
+        // Assert - Verify rate limit is detected
+        assertTrue(exception.isRateLimitError(), 
+            "HTTP 429 should be detected as rate limit error");
+        assertFalse(exception.isTokenExpiredError(), 
+            "HTTP 429 should not be detected as token expiration");
+    }
+
+    /**
+     * Test that rate limit errors with OAuthRateLimitException are detected
+     * Validates Requirement 15.2: Rate limit error detection
+     */
+    @Test
+    void testRateLimitErrorDetection_OAuthRateLimitException() {
+        // Arrange - Create exception for OAuthRateLimitException
+        GraphApiException exception = new GraphApiException(
+            "Application request limit reached", 
+            403, 
+            "OAuthRateLimitException"
+        );
+        
+        // Assert - Verify rate limit is detected
+        assertTrue(exception.isRateLimitError(), 
+            "OAuthRateLimitException should be detected as rate limit error");
+    }
+
+    /**
+     * Test that token expiration errors are properly detected
+     * Validates Requirement 5.5: Token expiration detection
+     */
+    @Test
+    void testTokenExpirationDetection_OAuthException() {
+        // Arrange - Create exception for OAuthException
+        GraphApiException exception = new GraphApiException(
+            "Error validating access token", 
+            401, 
+            "OAuthException"
+        );
+        
+        // Assert - Verify token expiration is detected
+        assertTrue(exception.isTokenExpiredError(), 
+            "OAuthException should be detected as token expiration");
+        assertFalse(exception.isRateLimitError(), 
+            "OAuthException should not be detected as rate limit error");
+    }
+
+    /**
+     * Test that token expiration with error code 190 is detected
+     * Validates Requirement 5.5: Token expiration detection
+     */
+    @Test
+    void testTokenExpirationDetection_ErrorCode190() {
+        // Arrange - Create exception for error code 190
+        GraphApiException exception = new GraphApiException(
+            "Invalid OAuth access token", 
+            190, 
+            "TOKEN_EXPIRED"
+        );
+        
+        // Assert - Verify token expiration is detected
+        assertTrue(exception.isTokenExpiredError(), 
+            "Error code 190 should be detected as token expiration");
+    }
+
+    /**
+     * Test that non-retriable errors are not misidentified
+     * Validates proper error classification
+     */
+    @Test
+    void testNonRetriableErrors() {
+        // Arrange - Create various non-retriable errors
+        GraphApiException permissionsError = new GraphApiException(
+            "Insufficient permissions", 
+            403, 
+            "PERMISSIONS_ERROR"
+        );
+        GraphApiException notFoundError = new GraphApiException(
+            "Media not found", 
+            404, 
+            "NOT_FOUND"
+        );
+        
+        // Assert - Verify these are not misidentified
+        assertFalse(permissionsError.isRateLimitError(), 
+            "Permission errors should not be rate limit errors");
+        assertFalse(permissionsError.isTokenExpiredError(), 
+            "Permission errors should not be token expiration errors");
+        assertFalse(notFoundError.isRateLimitError(), 
+            "Not found errors should not be rate limit errors");
+        assertFalse(notFoundError.isTokenExpiredError(), 
+            "Not found errors should not be token expiration errors");
+    }
+
+    /**
+     * Test that retry configuration is present on fetchPostInsights
+     * Validates Requirement 15.2: Exponential backoff implementation
+     * 
+     * Note: This test verifies the @Retryable annotation is present.
+     * The actual exponential backoff behavior (60s, 120s, 240s) is configured
+     * in the @Retryable annotation and tested via integration tests.
+     */
+    @Test
+    void testRetryableAnnotationPresent() throws NoSuchMethodException {
+        // Get the fetchPostInsights method
+        var method = InstagramGraphApiService.class.getMethod(
+            "fetchPostInsights", 
+            String.class, 
+            String.class
+        );
+        
+        // Verify @Retryable annotation is present
+        boolean hasRetryable = method.isAnnotationPresent(
+            org.springframework.retry.annotation.Retryable.class
+        );
+        
+        assertTrue(hasRetryable, 
+            "fetchPostInsights should have @Retryable annotation for exponential backoff");
+    }
 }
 
