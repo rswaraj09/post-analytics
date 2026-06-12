@@ -136,30 +136,19 @@ public class PlaywrightScrapingService implements ScrapingService {
                                   data.getLikesCount() > 0;
             
             if (!hasRealData) {
-                // FOR DEMO: If we can't scrape real data, return mock data with a warning
-                log.warn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                log.warn("⚠️  DEMO MODE: Could not scrape real data from Instagram");
-                log.warn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                log.warn("Reason: Instagram now requires login to view post metrics");
-                log.warn("Solution: For production, implement Instagram Graph API (Task 8)");
-                log.warn("Returning MOCK DATA for demonstration purposes...");
-                log.warn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                // Scraping failed - Instagram requires login to view post metrics
+                log.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                log.error("⚠️  Could not scrape real data from Instagram");
+                log.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                log.error("Reason: Instagram now requires login to view post metrics");
+                log.error("Solution: Use Instagram Graph API with business account access token");
+                log.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
                 
-                // Generate realistic mock data
-                long mockLikes = ThreadLocalRandom.current().nextLong(1000, 50000);
-                long mockComments = ThreadLocalRandom.current().nextLong(10, 500);
-                long mockViews = ThreadLocalRandom.current().nextLong(5000, 100000);
-                
-                data = ScrapedPostData.builder()
-                    .likesCount(mockLikes)
-                    .commentsCount(mockComments)
-                    .viewsCount(mockViews)
-                    .caption("🎭 [MOCK DATA] Instagram requires login to view real metrics. This is realistic sample data for demonstration. In production, use Instagram Graph API for authentic data.")
-                    .mediaUrl("https://www.instagram.com/static/images/ico/favicon-192.png/68d99ba29cc8.png")
-                    .build();
-                
-                log.warn("✅ Generated mock data: Likes={}, Comments={}, Views={}", mockLikes, mockComments, mockViews);
-                log.warn("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                throw new ScrapingException(
+                    "Instagram requires login to view post metrics. " +
+                    "Please add this post to a business profile with a valid Graph API token, " +
+                    "or ensure the post is publicly accessible without login."
+                );
             }
 
             rateLimited.set(false);

@@ -1,4 +1,5 @@
 com\socialmedia\instagram\dto\PostInsights$PostInsightsBuilder.class
+com\socialmedia\instagram\service\InstagramGraphApiService.class
 com\socialmedia\instagram\entity\InstagramProfile$InstagramProfileBuilder.class
 com\socialmedia\instagram\controller\AuthController$RegisterRequest.class
 com\socialmedia\instagram\controller\AuthController$LogoutRequest.class
@@ -59,4 +60,5 @@ com\socialmedia\instagram\controller\PostController$UpdateMonitoringStatusReques
 com\socialmedia\instagram\entity\InstagramProfile.class
 com\socialmedia\instagram\service\AuthService$RefreshResponse.class
 com\socialmedia\instagram\service\AuthService$RefreshResponse$Builder.class
+com\socialmedia\instagram\InstagramAnalyticsApplication.class
 com\socialmedia\instagram\entity\RefreshToken.class
